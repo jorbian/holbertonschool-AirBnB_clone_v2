@@ -130,10 +130,13 @@ class HBNBCommand(cmd.Cmd):
                 except (SyntaxError, NameError):
                     continue
             kwargs[ky] = vl
-        obj = eval(args[0])(**kwargs)
-        storage.new(obj)
+        if len(kwargs) == 0:
+            obj = eval(args[0])()
+        else:
+            obj = eval(args[0])(**kwargs)
+            storage.new(obj)
         print(obj.id)
-        storage.save()
+        obj.save()
 
     def help_create(self):
         """ Help information for the create method """

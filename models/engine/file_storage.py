@@ -12,6 +12,8 @@ class FileStorage:
         """Returns a dictionary of models currently in storage
         if cls specified, only returns that class"""
         if cls is not None:
+            if type(cls) is str:
+                cls = eval(cls)
             spec_rich = {}
             for ky, vl in self.__objects.items():
                 if cls == type(vl):
