@@ -123,7 +123,7 @@ class HBNBCommand(cmd.Cmd):
         for param in range(1, len(args)):
             ky, vl = args[param].split("=")
             if vl[0] == '"':
-                vl = vl.replace('_', ' ')
+                vl = vl.replace('_', ' ').strip('"')
             else:
                 try:
                     vl = eval(vl)
