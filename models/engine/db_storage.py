@@ -34,9 +34,17 @@ class DBStorage:
         if obj is not None:
             self.__session.delete(obj)
 
-    def all(self):
-        obs = self.__session.query(Review).all()
-        return obs
+    def all(self, cls=None):
+        cls_lst = ["Review", "City", "State", "User", "Place", "Amenity"]
+        obj_lst = []
+        if cls is None:
+            for cls_type in cls_lst:
+                obj_lst.extend(self.__session.query(cls_type).all())
+        else:
+            if type(cls) == str:
+                cls = eval(cls)
+            obj_lst = self.__session.query(cls).all()
+        return {"{}.{}".format(type(obj).__name__, obj.id): obj for obj in obj_lst}
 
     def close(self):
         self.__session.close()
