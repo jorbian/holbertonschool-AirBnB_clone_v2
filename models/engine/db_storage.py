@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
-class TBStorage:
+class DBStorage:
     __engine = None
     __session = None
     def __init__(self):
