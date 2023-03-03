@@ -3,7 +3,7 @@ from os import getenv
 from models.base_model import Base, BaseModel
 from models.review import Review
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 
 class DBStorage:
@@ -21,7 +21,8 @@ class DBStorage:
 
     def reload(self):
         Base.metadata.create_all(self.__engine)
-        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        the_session = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(the_session)
         self.__session = Session()
 
     def new(self, obj):
