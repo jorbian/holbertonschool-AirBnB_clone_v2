@@ -134,7 +134,6 @@ class HBNBCommand(cmd.Cmd):
             obj = eval(args[0])()
         else:
             obj = eval(args[0])(**kwargs)
-            storage.new(obj)
         print(obj.id)
         obj.save()
 
