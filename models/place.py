@@ -1,10 +1,21 @@
 #!/usr/bin/python3
 """ Place Module for HBNB project """
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey, Integer, Float
+from sqlalchemy import Column, String, ForeignKey, Integer, Float, Table
 from models.review import Review
 from os import getenv
 from sqlalchemy.orm import relationship
+
+
+place_amenity = Table('place_amenity', Base.metadata,
+                      Column('place_id', String(60),
+                             ForeignKey('places.id'),
+                             primary_key=True,
+                             nullable=False),
+                      Column('amenity_id', String(60),
+                             ForeignKey('amenities.id'),
+                             primary_key=True,
+                             nullable=False))
 
 class Place(BaseModel, Base):
     """ A place to stay """
@@ -26,6 +37,10 @@ class Place(BaseModel, Base):
         reviews = relationship('Review',
                                cascade="all, delete, delete-orphan",
                                backref="place")
+        amenities = relationship("Amenity",
+                                 secondary=place_amenity,
+                                 back_populates='place_amenities',
+                                 viewonly=False)
     else:
         @property
         def reviews(self):
@@ -36,3 +51,24 @@ class Place(BaseModel, Base):
                 if x.place_id == self.id:
                     rev.append(x)
             return rev
+
+        @property
+        def amenities(self):
+            """getter"""
+            from models import storage
+            from models.amenity import Amenity
+            ame = []
+            moby = storage.all(Amenity)
+
+            for amenity_inst in moby.values():
+                if amenity_inst.id == self.amenity_id:
+                    ame.append(amenity_inst)
+            return ame
+
+        @amenities.setter
+        def amenities(self, amenity_list):
+            """setter"""
+            from models.amenity import Amenity
+            for x in amenity_list:
+                if type(x) == Amenity:
+                    self.amenity_ids.append(x)
