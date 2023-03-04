@@ -1,13 +1,6 @@
 #!/usr/bin/python3
 """This module defines a class to manage file storage for hbnb clone"""
 import json
-from models.base_model import BaseModel
-from models.state import State
-from models.place import Place
-from models.amenity import Amenity
-from models.review import Review
-from models.city import City
-from models.user import User
 
 
 class FileStorage:
@@ -42,21 +35,33 @@ class FileStorage:
             json.dump(temp, f)
 
     def reload(self):
-        """Deserializes jason into __objects (poor jason)"""
+        """Loads storage dictionary from file"""
+        from models.base_model import BaseModel
+        from models.user import User
+        from models.place import Place
+        from models.state import State
+        from models.city import City
+        from models.amenity import Amenity
+        from models.review import Review
+
+        classes = {
+                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
+                    'State': State, 'City': City, 'Amenity': Amenity,
+                    'Review': Review
+                  }
         try:
-            with open(self.__file_path, encoding='utf-8') as fred:
-                richard = json.load(fred)
-                for key, value in richard.items():
-                    obj = eval(value['__class__'])(**value)
-                    self.__objects[key] = obj
+            temp = {}
+            with open(FileStorage.__file_path, 'r') as f:
+                temp = json.load(f)
+                for key, val in temp.items():
+                        self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
 
     def delete(self, obj=None):
         """if obj deletes obj from __objects"""
-        if obj != None:
-            try:
-                key = obj.__class__.__name__ + "." + obj.id
-                del self.__objects[key]
-            except (AttributeError, KeyError):
-                pass
+        try:
+            key = obj.__class__.__name__ + "." + obj.id
+            del self.__objects[key]
+        except (AttributeError, KeyError):
+            pass
