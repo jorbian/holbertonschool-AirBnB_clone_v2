@@ -20,8 +20,7 @@ class BaseModel:
         if kwargs:
             for ky, vl in kwargs.items():
                 if ky in ('created_at', 'updated_at'):
-                    setattr(self, ky, datetime.
-                            strptime(vl, '%Y-%m-%dT%H:%M:%S.%f'))
+                    vl = datetime.strptime(vl, '%Y-%m-%dT%H:%M:%S.%f')
                 if ky != '__class__':
                     setattr(self, ky, vl)
 
