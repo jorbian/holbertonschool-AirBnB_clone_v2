@@ -103,5 +103,6 @@ class TestHBNBCommand(unittest.TestCase):
     def test_reload(self):
         self.assertEqual(1, 1)
 
+
 if __name__ == "__main__":
     unittest.main()
