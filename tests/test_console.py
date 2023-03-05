@@ -151,17 +151,13 @@ class TestHBNBComDB(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        storage.reload()
-        cls.cli = HBNBCommand()
-        cls.cli.do_create('State '
-                          'name="California"')
-        cls.storage_objs = storage.all()
-        for v in cls.storage_objs.values():
-            cls.obj = v
+        pass
 
     def setUp(self):
-        self.CLI = TestHBNBComDB.cli
-        self.obj = TestHBNBComDB.obj
+        pass
+
+    def test_storage(self):
+        self.assertIsInstance(storage, DBStorage)
 
 
 if __name__ == "__main__":
