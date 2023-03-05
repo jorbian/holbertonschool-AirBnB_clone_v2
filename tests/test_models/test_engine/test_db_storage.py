@@ -70,6 +70,13 @@ class TestDBStorage(unittest.TestCase):
         self.assertEqual(len(obj), 1)
         self.assertEqual(self.state, list(obj.values())[0])
 
+    def test_docstrings(self):
+        self.assertIsNotNone(FileStorage.__doc__)
+        self.assertIsNotNone(FileStorage.all.__doc__)
+        self.assertIsNotNone(FileStorage.new.__doc__)
+        self.assertIsNotNone(FileStorage.reload.__doc__)
+        self.assertIsNotNone(FileStorage.delete.__doc__)
+
 
 if __name__ == "__main__":
     unittest.main()
