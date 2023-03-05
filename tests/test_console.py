@@ -158,6 +158,10 @@ class TestHBNBComDB(unittest.TestCase):
 
     def test_storage(self):
         self.assertIsInstance(storage, DBStorage)
+        obj = State()
+        obj.name = "California"
+        obj.save()
+        self.assertEqual(type(obj), State)
 
 
 if __name__ == "__main__":
