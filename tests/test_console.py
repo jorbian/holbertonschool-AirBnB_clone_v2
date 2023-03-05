@@ -3,13 +3,18 @@
 import os
 import unittest
 import models
+import console
+from models.base_model import BaseModel, Base
+from models.state import State
 from unittest.mock import patch
 from io import StringIO
 from console import HBNBCommand
 from models.engine.db_storage import DBStorage
 from models.engine.file_storage import FileStorage
+storage = console.storage
 
 
+@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', 'test FS mode')
 class TestHBNBCommand(unittest.TestCase):
     """Unittests for testing the HBNB command interpreter."""
 
@@ -57,7 +62,6 @@ class TestHBNBCommand(unittest.TestCase):
             self.HBNB.onecmd("\n")
             self.assertEqual("", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Testing DBStorage")
     def test_create(self):
         """Test create command."""
         with patch("sys.stdout", new=StringIO()) as f:
@@ -103,7 +107,6 @@ class TestHBNBCommand(unittest.TestCase):
             self.HBNB.onecmd("all Amenity")
             self.assertIn(am, f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Testing DBStorage")
     def test_show(self):
         """Test show command."""
         with patch("sys.stdout", new=StringIO()) as f:
@@ -123,7 +126,6 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Testing DBStorage")
     def test_destroy(self):
         """Test destroy command input."""
         with patch("sys.stdout", new=StringIO()) as f:
@@ -142,6 +144,24 @@ class TestHBNBCommand(unittest.TestCase):
             self.HBNB.onecmd("destroy BaseModel 12345")
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
+
+@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db', 'test DB mode')
+class TestHBNBComDB(unittest.TestCase):
+    """testing DB Storage"""
+
+    @classmethod
+    def setUpClass(cls):
+        storage.reload()
+        cls.cli = HBNBCommand()
+        cls.cli.do_create('State '
+                          'name="California"')
+        cls.storage_objs = storage.all()
+        for v in cls.storage_objs.values():
+            cls.obj = v
+
+    def setUp(self):
+        self.CLI = TestHBNBComDB.cli
+        self.obj = TestHBNBComDB.obj
 
 
 if __name__ == "__main__":
