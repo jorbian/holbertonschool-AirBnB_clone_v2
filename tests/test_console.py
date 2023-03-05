@@ -145,6 +145,7 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
 
+
 @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db', 'test DB mode')
 class TestHBNBComDB(unittest.TestCase):
     """testing DB Storage"""
