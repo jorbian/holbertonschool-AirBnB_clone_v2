@@ -101,7 +101,8 @@ class TestHBNBCommand(unittest.TestCase):
     @unittest.skipIf(type(models.storage) == FileStorage,
                      "Testing FileStorage")
     def test_reload(self):
-        self.assertEqual(1, 1)
+        storage = DBStorage()
+        self.assertIsInstance(storage, DBStorage)
 
 
 if __name__ == "__main__":
