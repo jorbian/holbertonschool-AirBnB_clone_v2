@@ -40,6 +40,11 @@ class TestHBNBCommand(unittest.TestCase):
         except IOError:
             pass
 
+    def test_emptyline(self):
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("\n")
+            self.assertEqual("", f.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
