@@ -91,16 +91,24 @@ class TestHBNBCommand(unittest.TestCase):
             self.HBNB.onecmd("all Amenity")
             self.assertIn(am, f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == FileStorage,
-                     "Testing FileStorage")
-    def test_reload(self):
-        """Test reload method."""
-        og_session = self.storage._DBStorage__session
-        self.storage.reload()
-        self.assertIsInstance(self.storage._DBStorage__session, Session)
-        self.assertNotEqual(og_session, self.storage._DBStorage__session)
-        self.storage._DBStorage__session.close()
-        self.storage._DBStorage__session = og_session
+    def test_show(self):
+        """Test show command."""
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("show")
+            self.assertEqual(
+                "** class name missing **\n", f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("show asdfsdrfs")
+            self.assertEqual(
+                "** class doesn't exist **\n", f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("show BaseModel")
+            self.assertEqual(
+                "** instance id missing **\n", f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("show BaseModel abcd-123")
+            self.assertEqual(
+                "** no instance found **\n", f.getvalue())
 
 
 if __name__ == "__main__":
