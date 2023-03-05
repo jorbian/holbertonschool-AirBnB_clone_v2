@@ -151,7 +151,7 @@ class TestHBNBComDB(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        cls.cli = HBNBCommand()
 
     def setUp(self):
         pass
@@ -162,6 +162,14 @@ class TestHBNBComDB(unittest.TestCase):
         obj.name = "California"
         obj.save()
         self.assertEqual(type(obj), State)
+
+    def test_crt_dbs(self):
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.cli.onecmd("create State name='California'")
+            ca = f.getvalue().strip()
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.cli.onecmd("all State")
+            self.assertIn(ca, f.getvalue())
 
 
 if __name__ == "__main__":
