@@ -5,7 +5,7 @@ import models
 import MySQLdb
 import unittest
 import os
-from models.base_model import BaseModel
+from models.base_model import BaseModel, Base
 from models.user import User
 from models.state import State
 from models.city import City
@@ -24,59 +24,51 @@ class TestDBStorage(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        try:
-            os.rename("file.json", "tmp")
-        except IOError:
-            pass
-        FileStorage._FileStorage__objects = {}
-        cls.storage = FileStorage()
-        cls.base = BaseModel()
-        key = "{}.{}".format(type(cls.base).__name__, cls.base.id)
-        FileStorage._FileStorage__objects[key] = cls.base
-        cls.user = User()
-        key = "{}.{}".format(type(cls.user).__name__, cls.user.id)
-        FileStorage._FileStorage__objects[key] = cls.user
-        cls.state = State()
-        key = "{}.{}".format(type(cls.state).__name__, cls.state.id)
-        FileStorage._FileStorage__objects[key] = cls.state
-        cls.place = Place()
-        key = "{}.{}".format(type(cls.place).__name__, cls.place.id)
-        FileStorage._FileStorage__objects[key] = cls.place
-        cls.city = City()
-        key = "{}.{}".format(type(cls.city).__name__, cls.city.id)
-        FileStorage._FileStorage__objects[key] = cls.city
-        cls.amenity = Amenity()
-        key = "{}.{}".format(type(cls.amenity).__name__, cls.amenity.id)
-        FileStorage._FileStorage__objects[key] = cls.amenity
-        cls.review = Review()
-        key = "{}.{}".format(type(cls.review).__name__, cls.review.id)
-        FileStorage._FileStorage__objects[key] = cls.review
+        if type(models.storage) == DBStorage:
+            cls.storage = DBStorage()
+            Base.metadata.create_all(cls.storage._DBStorage__engine)
+            Session = sessionmaker(bind=cls.storage._DBStorage__engine)
+            cls.storage._DBStorage__session = Session()
+            cls.state = State(name="California")
+            cls.storage._DBStorage__session.add(cls.state)
+            cls.city = City(name="San_Jose", state_id=cls.state.id)
+            cls.storage._DBStorage__session.add(cls.city)
+            cls.user = User(email="poppy@holberton.com", password="betty")
+            cls.storage._DBStorage__session.add(cls.user)
+            cls.place = Place(city_id=cls.city.id, user_id=cls.user.id,
+                              name="School")
+            cls.storage._DBStorage__session.add(cls.place)
+            cls.amenity = Amenity(name="Wifi")
+            cls.storage._DBStorage__session.add(cls.amenity)
+            cls.review = Review(place_id=cls.place.id, user_id=cls.user.id,
+                                text="stellar")
+            cls.storage._DBStorage__session.add(cls.review)
+            cls.storage._DBStorage__session.commit()
 
     @classmethod
     def tearDownClass(cls):
-        try:
-            os.remove("file.json")
-        except IOError:
-            pass
-        try:
-            os.rename("tmp", "file.json")
-        except IOError:
-            pass
-        del cls.storage
-        del cls.base
-        del cls.user
-        del cls.state
-        del cls.place
-        del cls.city
-        del cls.amenity
-        del cls.review
+        if type(models.storage) == DBStorage:
+            cls.storage._DBStorage__session.delete(cls.state)
+            cls.storage._DBStorage__session.delete(cls.city)
+            cls.storage._DBStorage__session.delete(cls.user)
+            cls.storage._DBStorage__session.delete(cls.amenity)
+            cls.storage._DBStorage__session.commit()
+            del cls.state
+            del cls.city
+            del cls.user
+            del cls.place
+            del cls.amenity
+            del cls.review
+            cls.storage._DBStorage__session.close()
+            del cls.storage
 
-    def test_docstrings(self):
-        self.assertIsNotNone(FileStorage.__doc__)
-        self.assertIsNotNone(FileStorage.all.__doc__)
-        self.assertIsNotNone(FileStorage.new.__doc__)
-        self.assertIsNotNone(FileStorage.reload.__doc__)
-        self.assertIsNotNone(FileStorage.delete.__doc__)
+    @unittest.skipIf(type(models.storage) == FileStorage,
+                     "Testing FileStorage")
+    def test_all_cls(self):
+        obj = self.storage.all(State)
+        self.assertEqual(type(obj), dict)
+        self.assertEqual(len(obj), 1)
+        self.assertEqual(self.state, list(obj.values())[0])
 
 
 if __name__ == "__main__":
