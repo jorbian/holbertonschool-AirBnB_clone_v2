@@ -2,6 +2,7 @@
 """ Module for testing file storage"""
 import unittest
 from models.base_model import BaseModel
+from models.engine.file_storage import FileStorage
 from models import storage
 import os
 
@@ -9,6 +10,7 @@ import os
 class test_fileStorage(unittest.TestCase):
     """ Class to test the file storage method """
 
+    @unittest.skipIf(os.getenv("HBNB_ENV") is not None, "Testing DBStorage")
     def setUp(self):
         """ Set up test environment """
         del_list = []
