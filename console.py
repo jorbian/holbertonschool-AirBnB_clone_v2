@@ -119,6 +119,9 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return
         args = line.split()
+        if args[0] not in HBNBCommand.classes.keys():
+            print("** class doesn't exist **")
+            return
         kwargs = {}
         for param in range(1, len(args)):
             ky, vl = args[param].split("=")
@@ -212,8 +215,13 @@ class HBNBCommand(cmd.Cmd):
         """ Shows all objects, or all objects of a class"""
         if not line:
             objs = storage.all()
-        else:
-            objs = storage.all(eval(line))
+        if line:
+            args = line.split()
+            if args[0] not in HBNBCommand.classes.keys():
+                print("** class doesn't exist **")
+                return
+            else:
+                objs = storage.all(eval(line))
         print([objs[key].__str__() for key in objs])
 
     def help_all(self):

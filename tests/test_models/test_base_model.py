@@ -33,6 +33,7 @@ class test_basemodel(unittest.TestCase):
         i = self.value()
         self.assertEqual(type(i), self.value)
 
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', 'test FS mode')
     def test_kwargs(self):
         """ """
         i = self.value()

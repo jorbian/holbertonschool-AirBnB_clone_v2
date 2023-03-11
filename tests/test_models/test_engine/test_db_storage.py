@@ -19,6 +19,7 @@ from sqlalchemy.orm.session import Session
 from sqlalchemy.engine.base import Engine
 
 
+@unittest.skipIf(type(models.storage) == FileStorage, "Testing FileStorage")
 class TestDBStorage(unittest.TestCase):
     """ """
 
@@ -62,23 +63,12 @@ class TestDBStorage(unittest.TestCase):
             cls.storage._DBStorage__session.close()
             del cls.storage
 
-    @unittest.skipIf(type(models.storage) == FileStorage,
-                     "Testing FileStorage")
     def test_all_cls(self):
         obj = self.storage.all(State)
         self.assertEqual(type(obj), dict)
         self.assertEqual(len(obj), 1)
         self.assertEqual(self.state, list(obj.values())[0])
 
-    def test_docstrings(self):
-        self.assertIsNotNone(FileStorage.__doc__)
-        self.assertIsNotNone(FileStorage.all.__doc__)
-        self.assertIsNotNone(FileStorage.new.__doc__)
-        self.assertIsNotNone(FileStorage.reload.__doc__)
-        self.assertIsNotNone(FileStorage.delete.__doc__)
-
-    @unittest.skipIf(type(models.storage) == FileStorage,
-                     "Testing FileStorage")
     def test_reload(self):
         """Test reload method."""
         og_session = self.storage._DBStorage__session
