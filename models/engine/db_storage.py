@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from os import getenv
-from models.base_model import Base, BaseModel
+from models.base_model import Base
 from models.review import Review
 from models.city import City
 from models.state import State
@@ -14,6 +14,14 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 class DBStorage:
     __engine = None
     __session = None
+    CLS_LST = {
+        'Amenity': Amenity,
+        'City': City,
+        'Place': Place,
+        'Review': Review,
+        'State': State,
+        'User': User
+    }
 
     def __init__(self):
         self.__engine = create_engine("mysql+mysqldb://{}:{}@{}/{}".format(
@@ -42,20 +50,26 @@ class DBStorage:
             self.__session.delete(obj)
 
     def all(self, cls=None):
-        cls_lst = ["Review", "City", "State", "User", "Place", "Amenity"]
-        obj_lst = []
+        obj_dct = {}
+        qry = []
         if cls is None:
-            for cls_type in cls_lst:
-                obj_lst.extend(self.__session.query(cls_type).all())
+            for cls_typ in DBStorage.CLS_LST.values():
+                qry.extend(self.__session.query(cls_typ).all())
         else:
-            if type(cls) == str:
-                cls = eval(cls)
-            obj_lst = self.__session.query(cls).all()
-        return {"{}.{}".format(type(obj).__name__,
-                               obj.id): obj for obj in obj_lst}
+            qry = self.__session.query(cls)
+        for obj in qry:
+            obj_key = "{}.{}".format(type(obj).__name__, obj.id)
+            obj_dct[obj_key] = obj
+        return obj_dct
 
     def close(self):
         self.__session.close()
 
-    def total(self):
-        return len(self.__session.query(Review).all())
+    def hcf(self):
+        for cls in DBStorage.CLS_LST.values():
+            qry = self.__session.query(cls)
+            all_objs = [obj for obj in qry]
+            for obj in range(len(all_objs)):
+                to_delete = all_objs.pop(0)
+                to_delete.delete()
+        self.save()

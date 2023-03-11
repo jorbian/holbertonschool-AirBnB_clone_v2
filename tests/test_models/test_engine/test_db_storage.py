@@ -78,6 +78,22 @@ class TestDBStorage(unittest.TestCase):
         self.storage._DBStorage__session.close()
         self.storage._DBStorage__session = og_session
 
+    def test_state_no_name(self):
+        """... checks to create a state with no name"""
+        with self.assertRaises(Exception) as context:
+            s = State()
+            s.save()
+        self.assertTrue('"Column \'name\' cannot be null"'
+                        in str(context.exception))
+
+    def test_amenity_no_name(self):
+        """... checks to create an amenity with no name"""
+        with self.assertRaises(Exception) as context:
+            a = Amenity()
+            a.save()
+        self.assertTrue('"Column \'name\' cannot be null"'
+                        in str(context.exception))
+
 
 if __name__ == "__main__":
     unittest.main()
