@@ -1,27 +1,13 @@
 #!/usr/bin/python3
 from os import getenv
-from models.base_model import Base
-from models.review import Review
-from models.city import City
-from models.state import State
-from models.amenity import Amenity
-from models.user import User
-from models.place import Place
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
+from models.base_model import Base
 
 
 class DBStorage:
     __engine = None
     __session = None
-    CLS_LST = {
-        'Amenity': Amenity,
-        'City': City,
-        'Place': Place,
-        'Review': Review,
-        'State': State,
-        'User': User
-    }
 
     def __init__(self):
         self.__engine = create_engine("mysql+mysqldb://{}:{}@{}/{}".format(
@@ -30,8 +16,6 @@ class DBStorage:
                                             getenv('HBNB_MYSQL_HOST'),
                                             getenv('HBNB_MYSQL_DB')),
                                       pool_pre_ping=True)
-        if getenv('HBNB_ENV') == 'test':
-            Base.metadata.drop_all(self.__engine)
 
     def reload(self):
         Base.metadata.create_all(self.__engine)
@@ -51,25 +35,32 @@ class DBStorage:
 
     def all(self, cls=None):
         obj_dct = {}
-        qry = []
+        metadata = MetaData()
+        metadata.reflect(bind=self.__engine)
         if cls is None:
-            for cls_typ in DBStorage.CLS_LST.values():
-                qry.extend(self.__session.query(cls_typ).all())
+            for table in metadata.sorted_tables:
+                stmt = table.select()
+                results = self.__session.execute(stmt).fetchall()
+                for row in results:
+                    obj_key = "{}.{}".format(table.name, row.id)
+                    obj_dct[obj_key] = row
         else:
             qry = self.__session.query(cls)
-        for obj in qry:
-            obj_key = "{}.{}".format(type(obj).__name__, obj.id)
-            obj_dct[obj_key] = obj
+            for obj in qry:
+                obj_key = "{}.{}".format(type(obj).__name__, obj.id)
+                obj_dct[obj_key] = obj
         return obj_dct
+
+    def gettables(self):
+        inspector = inspect(self.__engine)
+        return inspector.get_table_names()
 
     def close(self):
         self.__session.close()
 
-    def hcf(self):
-        for cls in DBStorage.CLS_LST.values():
-            qry = self.__session.query(cls)
-            all_objs = [obj for obj in qry]
-            for obj in range(len(all_objs)):
-                to_delete = all_objs.pop(0)
-                to_delete.delete()
+    def hcf(self, cls):
+        metadata = MetaData()
+        metadata.reflect(bind=self.__engine)
+        table = metadata.tables.get(cls.__tablename__)
+        self.__session.execute(table.delete())
         self.save()

@@ -140,6 +140,9 @@ class HBNBCommand(cmd.Cmd):
         print(obj.id)
         obj.save()
 
+    def do_hcf(self, line):
+        storage.hcf(eval(line))
+
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")

@@ -9,6 +9,7 @@ import os
 @unittest.skipIf(os.getenv("HBNB_ENV") is not None, "Testing DBStorage")
 class test_fileStorage(unittest.TestCase):
     """ Class to test the file storage method """
+
     def setUp(self):
         """ Set up test environment """
         del_list = []
@@ -31,8 +32,8 @@ class test_fileStorage(unittest.TestCase):
     def test_new(self):
         """ New object is correctly added to __objects """
         new = BaseModel()
-        for obj in storage.all().values():
-            self.assertTrue(new is obj)
+        new.save()
+        self.assertIn(new, storage.all().values())
 
     def test_all(self):
         """ __objects is properly returned """
@@ -62,10 +63,12 @@ class test_fileStorage(unittest.TestCase):
     def test_reload(self):
         """ Storage file is successfully loaded to __objects """
         new = BaseModel()
-        storage.save()
+        new.save()
+        bm_id = new.to_dict()['id']
         storage.reload()
-        for obj in storage.all().values():
-            self.assertEqual(new.to_dict()['id'], obj.to_dict()['id'])
+        expected_key = 'BaseModel.' + bm_id
+        keys = list(storage.all().keys())
+        self.assertIn(expected_key, keys)
 
     def test_reload_empty(self):
         """ Load from an empty file """
@@ -95,9 +98,11 @@ class test_fileStorage(unittest.TestCase):
     def test_key_format(self):
         """ Key is properly formatted """
         new = BaseModel()
-        _id = new.to_dict()['id']
-        for key in storage.all().keys():
-            self.assertEqual(key, 'BaseModel' + '.' + _id)
+        bm_id = new.to_dict()['id']
+        new.save()
+        expected_key = 'BaseModel.' + bm_id
+        keys = list(storage.all().keys())
+        self.assertIn(expected_key, keys)
 
     def test_storage_var_created(self):
         """ FileStorage object storage created """
