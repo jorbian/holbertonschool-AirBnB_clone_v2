@@ -9,6 +9,14 @@ from models import city, place, review, state, amenity, user
 class DBStorage:
     __engine = None
     __session = None
+    CDIC = {
+        'City': city.City,
+        'Place': place.Place,
+        'Review': review.Review,
+        'State': state.State,
+        'Amenity': amenity.Amenity,
+        'User': user.User
+    }
 
     def __init__(self):
         self.__engine = create_engine("mysql+mysqldb://{}:{}@{}/{}".format(
@@ -36,20 +44,15 @@ class DBStorage:
 
     def all(self, cls=None):
         obj_dct = {}
-        metadata = MetaData()
-        metadata.reflect(bind=self.__engine)
+        qry = []
         if cls is None:
-            for table in metadata.sorted_tables:
-                stmt = table.select()
-                results = self.__session.execute(stmt).fetchall()
-                for row in results:
-                    obj_key = "{}.{}".format(table.name, row.id)
-                    obj_dct[obj_key] = row
+            for cls_typ in DBStorage.CDIC.values():
+                qry.extend(self.__session.query(cls_typ).all())
         else:
             qry = self.__session.query(cls)
-            for obj in qry:
-                obj_key = "{}.{}".format(type(obj).__name__, obj.id)
-                obj_dct[obj_key] = obj
+        for obj in qry:
+            obj_key = "{}.{}".format(type(obj).__name__, obj.id)
+            obj_dct[obj_key] = obj
         return obj_dct
 
     def gettables(self):
