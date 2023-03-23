@@ -49,6 +49,8 @@ class DBStorage:
             for cls_typ in DBStorage.CDIC.values():
                 qry.extend(self.__session.query(cls_typ).all())
         else:
+            if cls in self.CDIC.keys():
+                cls = self.CDIC.get(cls)
             qry = self.__session.query(cls)
         for obj in qry:
             obj_key = "{}.{}".format(type(obj).__name__, obj.id)
