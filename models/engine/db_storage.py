@@ -60,7 +60,7 @@ class DBStorage:
         return inspector.get_table_names()
 
     def close(self):
-        self.__session.close()
+        self.__session.remove()
 
     def hcf(self, cls):
         metadata = MetaData()

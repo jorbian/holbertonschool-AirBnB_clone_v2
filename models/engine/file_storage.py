@@ -65,3 +65,6 @@ class FileStorage:
             del self.__objects[key]
         except (AttributeError, KeyError):
             pass
+
+    def close(self):
+        self.reload()
