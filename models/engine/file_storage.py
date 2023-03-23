@@ -1,19 +1,28 @@
 #!/usr/bin/python3
 """This module defines a class to manage file storage for hbnb clone"""
 import json
+from models import city, place, review, state, amenity, user, base_model
 
 
 class FileStorage:
     """This class manages storage of hbnb models in JSON format"""
     __file_path = 'file.json'
     __objects = {}
+    CDIC = {
+        'City': city.City,
+        'Place': place.Place,
+        'Review': review.Review,
+        'State': state.State,
+        'Amenity': amenity.Amenity,
+        'User': user.User
+    }
 
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage
         if cls specified, only returns that class"""
         if cls is not None:
-            if type(cls) is str:
-                cls = eval(cls)
+            if cls in self.CDIC.keys():
+                cls = self.CDIC.get(cls)
             spec_rich = {}
             for ky, vl in self.__objects.items():
                 if cls == type(vl):
