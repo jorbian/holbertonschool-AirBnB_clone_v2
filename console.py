@@ -2,7 +2,7 @@
 """ console """
 
 import cmd
-import sys 
+import sys
 
 from models import storage
 from models import class_models
